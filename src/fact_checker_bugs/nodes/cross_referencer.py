@@ -1,7 +1,20 @@
 import time as _time
 
 from fact_checker_bugs.state import AgentState
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit # to get rid of redundunt url 
 
+def normalize_url(url):
+    parts = urlsplit(url)
+    query = [
+        (key, value)
+        for key, value in parse_qsl(parts.query, keep_blank_values=True)
+        if not key.lower().startswith("utm_")
+    ]
+
+    return urlunsplit(
+        (parts.scheme,parts.netloc,parts.path,urlencode(query, doseq=True),parts.fragment,)
+                      )
+# change it to a key val pair to comapre it then puts it back together
 
 def cross_reference_node(state: AgentState) -> dict:
     start = _time.time()
@@ -12,9 +25,10 @@ def cross_reference_node(state: AgentState) -> dict:
 
     for src in raw_sources:
         url = src.get("url")
+        normalized_url = normalize_url(url) if url else None
 
-        if url and url not in seen_urls:
-            seen_urls.add(url)
+        if normalized_url and normalized_url not in seen_urls:
+            seen_urls.add(normalized_url)
             deduped_sources.append(src)
 
     print(
