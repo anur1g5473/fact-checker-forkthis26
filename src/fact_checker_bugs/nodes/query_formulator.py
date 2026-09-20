@@ -9,6 +9,12 @@ from fact_checker_bugs.state import AgentState
 from fact_checker_bugs.utils.llm_utils import get_all_keys, invoke_with_backoff
 
 
+# The formulator only needs a glimpse of prior evidence to pick the next
+# query, so keep the prompt bounded no matter how many rounds have run.
+MAX_EVIDENCE_SOURCES = 5
+MAX_SNIPPET_CHARS = 300
+
+
 class SearchQueries(BaseModel):
     queries: List[str] = Field(
         description="Exactly 1 comprehensive search query to verify the claim."
@@ -35,8 +41,8 @@ def formulate_queries_node(state: AgentState) -> dict:
         [
             f"Title: {source.get('title', 'Unknown')}\n"
             f"URL: {source.get('url', 'N/A')}\n"
-            f"Content: {source.get('snippet', '')}"
-            for source in sources
+            f"Content: {(source.get('snippet') or '')[:MAX_SNIPPET_CHARS]}"
+            for source in sources[-MAX_EVIDENCE_SOURCES:]
         ]
     )
 
