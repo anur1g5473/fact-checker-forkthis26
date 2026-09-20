@@ -10,10 +10,7 @@ from fact_checker_bugs.nodes.scorer import score_claim_node
 
 def route_research(state: AgentState) -> str:
     sources = state.get("sources", [])
-
-
-   
-    loop_count = state.get("loops", 0)
+    loop_count = state.get("loop_count", 0)
 
     if len(sources) >= 3 or loop_count >= 2:
         return "scorer"
