@@ -14,7 +14,7 @@ def retrieve_sources_node(state: AgentState) -> dict:
     start = _time.time()
 
     queries = state.get("queries", [])
-    collected_sources = []
+    collected_sources = list(state.get("sources", []))
 
     key_cycle = cycle(get_all_keys())
 
